@@ -127,7 +127,20 @@ function normalizeJob(raw) {
 }
 
 // ── Location Keywords ─────────────────────────────────────────────────────────
+const HYDERABAD_LOCATIONS = [
+  'hyderabad', 'secunderabad', 'telangana',
+  'hitec city', 'hitex', 'madhapur', 'gachibowli',
+  'financial district', 'kondapur', 'jubilee hills',
+  'banjara hills', 'raidurg', 'nanakramguda',
+];
 
+const CHENNAI_TAMILNADU_LOCATIONS = [
+  'chennai', 'tamil nadu', 'tamilnadu',
+  'tidel park', 'taramani', 'omr', 'perungudi',
+  'siruseri', 'sholinganallur', 'guindy',
+  'coimbatore', 'madurai', 'trichy', 'tiruchirappalli',
+  'salem', 'erode', 'tirunelveli', 'hosur',
+];
 const KERALA_LOCATIONS = [
   'kerala', 'kochi', 'cochin', 'trivandrum', 'thiruvananthapuram',
   'kozhikode', 'calicut', 'thrissur', 'kannur', 'kollam', 'ernakulam',
@@ -145,12 +158,21 @@ const BANGALORE_LOCATIONS = [
 
 function isTargetLocation(location = '', description = '') {
   const combined = `${location} ${description}`.toLowerCase();
+
   return (
     KERALA_LOCATIONS.some((kw) => combined.includes(kw)) ||
-    BANGALORE_LOCATIONS.some((kw) => combined.includes(kw))
+    BANGALORE_LOCATIONS.some((kw) => combined.includes(kw)) ||
+    HYDERABAD_LOCATIONS.some((kw) => combined.includes(kw)) ||
+    CHENNAI_TAMILNADU_LOCATIONS.some((kw) => combined.includes(kw))
   );
 }
+function isHyderabadJob(location = '') {
+  return HYDERABAD_LOCATIONS.some(kw => location.toLowerCase().includes(kw));
+}
 
+function isChennaiTamilNaduJob(location = '') {
+  return CHENNAI_TAMILNADU_LOCATIONS.some(kw => location.toLowerCase().includes(kw));
+}
 function isKeralaJob(location = '') {
   return KERALA_LOCATIONS.some(kw => location.toLowerCase().includes(kw));
 }
@@ -245,8 +267,33 @@ const BANGALORE_SEARCHES = [
   { keywords: 'Full Stack Developer', location: 'Bangalore', q: 'full-stack-developer', l: 'bengaluru' },
 ];
 
-const ALL_SEARCHES = [...KERALA_SEARCHES, ...BANGALORE_SEARCHES];
+const HYDERABAD_SEARCHES = [
+  { keywords: 'Frontend Developer', location: 'Hyderabad', q: 'frontend-developer', l: 'hyderabad' },
+  { keywords: 'React Developer', location: 'Hyderabad', q: 'react-developer', l: 'hyderabad' },
+  { keywords: 'Node.js Developer', location: 'Hyderabad', q: 'nodejs-developer', l: 'hyderabad' },
+  { keywords: 'MERN Stack Developer', location: 'Hyderabad', q: 'mern-stack-developer', l: 'hyderabad' },
+  { keywords: 'Full Stack Developer', location: 'Hyderabad', q: 'full-stack-developer', l: 'hyderabad' },
+  { keywords: 'UI UX Designer', location: 'Hyderabad', q: 'ui-ux-designer', l: 'hyderabad' },
+  { keywords: 'Product Designer', location: 'Hyderabad', q: 'product-designer', l: 'hyderabad' },
+];
 
+const CHENNAI_TAMILNADU_SEARCHES = [
+  { keywords: 'Frontend Developer', location: 'Chennai', q: 'frontend-developer', l: 'chennai' },
+  { keywords: 'React Developer', location: 'Chennai', q: 'react-developer', l: 'chennai' },
+  { keywords: 'Node.js Developer', location: 'Chennai', q: 'nodejs-developer', l: 'chennai' },
+  { keywords: 'MERN Stack Developer', location: 'Chennai', q: 'mern-stack-developer', l: 'chennai' },
+  { keywords: 'Full Stack Developer', location: 'Chennai', q: 'full-stack-developer', l: 'chennai' },
+  { keywords: 'UI UX Designer', location: 'Chennai', q: 'ui-ux-designer', l: 'chennai' },
+  { keywords: 'Product Designer', location: 'Chennai', q: 'product-designer', l: 'chennai' },
+  { keywords: 'React Developer', location: 'Tamil Nadu', q: 'react-developer', l: 'tamil-nadu' },
+  { keywords: 'Frontend Developer', location: 'Coimbatore', q: 'frontend-developer', l: 'coimbatore' },
+];
+const ALL_SEARCHES = [
+  ...KERALA_SEARCHES,
+  ...BANGALORE_SEARCHES,
+  ...HYDERABAD_SEARCHES,
+  ...CHENNAI_TAMILNADU_SEARCHES,
+];
 // ── HTTP Helpers ──────────────────────────────────────────────────────────────
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -477,13 +524,26 @@ async function fetchCompanyCareers() {
     { name: 'Qburst', url: 'https://www.qburst.com/company/careers/', location: 'Trivandrum, Kerala' },
     { name: 'Experion Technologies', url: 'https://www.experionglobal.com/careers/', location: 'Trivandrum, Kerala' },
   ];
+  const hyderabadCompanies = [
+  { name: 'Lloyds Technology Centre', url: 'https://lloydstechnologycentre.com/', location: 'Hyderabad, Telangana' },
+  { name: 'Google Hyderabad', url: 'https://www.google.com/about/careers/applications/locations/hyderabad', location: 'Hyderabad, Telangana' },
+  { name: 'Hitachi Hyderabad', url: 'https://careers.hitachi.com/search/jobs/in/hyderabad', location: 'Hyderabad, Telangana' },
+];
+
+const chennaiTamilNaduCompanies = [
+  { name: 'TIDEL Park', url: 'https://www.tidelpark.com/en/careers', location: 'Chennai, Tamil Nadu' },
+  { name: 'Hitachi Chennai', url: 'https://careers.hitachi.com/search/jobs/in/chennai', location: 'Chennai, Tamil Nadu' },
+  { name: 'NatWest Chennai', url: 'https://jobs.natwestgroup.com/pages/chennai', location: 'Chennai, Tamil Nadu' },
+];
 
   const discoveredKeralaCompanies = (await discoverKeralaCompanies()).slice(0, 20);
 
-  const allCompanies = [
-    ...keralaCompanies,
-    ...discoveredKeralaCompanies,
-  ];
+const allCompanies = [
+  ...keralaCompanies,
+  ...hyderabadCompanies,
+  ...chennaiTamilNaduCompanies,
+  ...discoveredKeralaCompanies,
+];
 
   for (const comp of allCompanies) {
     try {
@@ -917,18 +977,22 @@ async function fetchInstahyre() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export async function fetchAllJobs() {
-  const fetchers = [
-    { name: 'Infopark', fn: fetchInfopark },
-    { name: 'Technopark', fn: fetchTechnopark },
-    { name: 'Prathidhwani', fn: fetchPrathidhwani },
-    { name: 'CompanyCareers', fn: fetchCompanyCareers },
-    { name: 'LinkedIn', fn: fetchLinkedIn },
-    { name: 'Naukri', fn: fetchNaukri },
-    { name: 'Shine', fn: fetchShine },
-    { name: 'Internshala', fn: fetchInternshala },
-    { name: 'Instahyre', fn: fetchInstahyre },
-  ];
-
+const fetchers = [
+  { name: 'Infopark', fn: fetchInfopark },
+  { name: 'Technopark', fn: fetchTechnopark },
+  { name: 'Cyberpark', fn: fetchCyberpark },
+  { name: 'Prathidhwani', fn: fetchPrathidhwani },
+  { name: 'CompanyCareers', fn: fetchCompanyCareers },
+  { name: 'LinkedIn', fn: fetchLinkedIn },
+  { name: 'Naukri', fn: fetchNaukri },
+  { name: 'Indeed', fn: fetchIndeed },
+  { name: 'Glassdoor', fn: fetchGlassdoor },
+  { name: 'Shine', fn: fetchShine },
+  { name: 'TimesJobs', fn: fetchTimesJobs },
+  { name: 'Internshala', fn: fetchInternshala },
+  { name: 'Wellfound', fn: fetchWellfound },
+  { name: 'Instahyre', fn: fetchInstahyre },
+];
   const batches = await Promise.all(fetchers.map((f) => f.fn()));
   const sources = [];
   const seen = new Set();
@@ -948,6 +1012,8 @@ export async function fetchAllJobs() {
   // ── Stats ─────────────────────────────────────────────────────────────────
   const keralaJobs = unique.filter(j => isKeralaJob(j.location));
   const bangaloreJobs = unique.filter(j => isBangaloreJob(j.location));
+const hyderabadJobs = unique.filter(j => isHyderabadJob(j.location));
+const chennaiTamilNaduJobs = unique.filter(j => isChennaiTamilNaduJob(j.location));
 
   const byRole = {};
   const byExp = { Fresher: 0, '0-2 Years': 0, '2+ Years': 0, Unknown: 0 };
@@ -956,7 +1022,9 @@ export async function fetchAllJobs() {
     byRole[job.roleCategory] = (byRole[job.roleCategory] || 0) + 1;
     byExp[job.experienceBucket] = (byExp[job.experienceBucket] || 0) + 1;
   }
-
+console.log(
+  `📍 Kerala: ${keralaJobs.length} | Bangalore: ${bangaloreJobs.length} | Hyderabad: ${hyderabadJobs.length} | Chennai/TN: ${chennaiTamilNaduJobs.length}`
+);
   console.log(`\n✅ Total: ${unique.length} jobs fetched`);
   console.log(`📍 Kerala: ${keralaJobs.length}  |  Bangalore: ${bangaloreJobs.length}`);
   console.log(`👤 Experience — Fresher: ${byExp.Fresher} | 0-2 Yrs: ${byExp['0-2 Years']} | 2+ Yrs: ${byExp['2+ Years']} | Unknown: ${byExp.Unknown}`);
@@ -970,11 +1038,13 @@ export async function fetchAllJobs() {
     jobs: unique,
     sources,
     stats: {
-      total: unique.length,
-      kerala: keralaJobs.length,
-      bangalore: bangaloreJobs.length,
-      byRole,
-      byExperience: byExp,
-    },
+  total: unique.length,
+  kerala: keralaJobs.length,
+  bangalore: bangaloreJobs.length,
+  hyderabad: hyderabadJobs.length,
+  chennaiTamilNadu: chennaiTamilNaduJobs.length,
+  byRole,
+  byExperience: byExp,
+},
   };
 }
