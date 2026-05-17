@@ -17,30 +17,42 @@ import Settings from './models/Settings.js';
 async function seed() {
   await connectDB();
 
-  const email = (process.env.ADMIN_EMAIL || 'saviyogeorge903734@gmail.com').toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || 'admin123';
-
-  const hash = await bcrypt.hash(password, 10);
-  let user = await User.findOne({ email });
-  if (!user) {
-    user = await User.create({
-      email,
-      password: hash,
+  const usersToSeed = [
+    {
+      email: (process.env.ADMIN_EMAIL || 'saviyogeorge903734@gmail.com').toLowerCase(),
+      password: process.env.ADMIN_PASSWORD || 'admin123',
       name: 'Saviyo George',
-      role: 'admin',
-    });
-    console.log('Admin user created:', email);
-  } else {
-    user.password = hash;
-    await user.save();
-    console.log('Admin password reset to match ADMIN_PASSWORD in .env');
-  }
+    },
+    {
+      email: 'sebing403@gmail.com',
+      password: process.env.ADMIN_PASSWORD || 'admin123',
+      name: 'Sebin G',
+    }
+  ];
 
-  await Settings.findOneAndUpdate(
-    { userId: user._id },
-    {},
-    { upsert: true }
-  );
+  for (const u of usersToSeed) {
+    const hash = await bcrypt.hash(u.password, 10);
+    let user = await User.findOne({ email: u.email });
+    if (!user) {
+      user = await User.create({
+        email: u.email,
+        password: hash,
+        name: u.name,
+        role: 'admin',
+      });
+      console.log(`Admin user created: ${u.email}`);
+    } else {
+      user.password = hash;
+      await user.save();
+      console.log(`Admin password reset for: ${u.email}`);
+    }
+
+    await Settings.findOneAndUpdate(
+      { userId: user._id },
+      {},
+      { upsert: true }
+    );
+  }
 
   console.log('Seed complete');
   process.exit(0);

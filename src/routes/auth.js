@@ -12,14 +12,9 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Email and password required' });
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'saviyogeorge903734@gmail.com';
-    if (email.toLowerCase() !== adminEmail.toLowerCase()) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(401).json({ message: 'Admin user not seeded. Run npm run seed' });
+      return res.status(401).json({ message: 'Invalid credentials or user not seeded' });
     }
 
     const valid = await bcrypt.compare(password, user.password);
