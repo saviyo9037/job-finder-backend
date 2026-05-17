@@ -8,7 +8,9 @@ dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 export async function connectDB() {
   const uri = process.env.MONGO_URI;
   if (!uri) {
-    throw new Error('MONGO_URI is not set in server/.env');
+    throw new Error(
+      'MONGO_URI is not set. Configure MONGO_URI in Render environment variables or in server/.env.'
+    );
   }
 
   const options = { serverSelectionTimeoutMS: 20000 };

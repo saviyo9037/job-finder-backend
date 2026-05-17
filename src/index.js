@@ -3,7 +3,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+const envResult = dotenv.config({ path: path.join(__dirname, '..', '.env') });
+if (envResult.error) {
+  console.warn('Warning: server/.env not loaded; relying on environment variables only.');
+} else {
+  console.log('Loaded environment variables from server/.env');
+}
 
 import express from 'express';
 import cors from 'cors';
